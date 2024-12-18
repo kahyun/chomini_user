@@ -8,10 +8,11 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/user")
 public class UserController {
     private final UserService rentService;
 
-    @PostMapping
+    @PostMapping("/insert")
     public String insert(@RequestBody User user) {
         rentService.insert(user);
         return "Rent Insert +++++++++++++++";
@@ -28,13 +29,13 @@ public class UserController {
         return "Rent deleted successfully! delete -------";
     }
 
-    @PutMapping
+    @PostMapping("/update")
     public String update(@RequestBody User user) {
         rentService.update(user);
         return "Rent updated successfully!update update upupupupup";
     }
 
-    @GetMapping
+    @GetMapping("/all")
     public List<User> findAll() {
         return rentService.findAll();
     }
