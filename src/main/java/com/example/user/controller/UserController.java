@@ -1,7 +1,7 @@
 package com.example.user.controller;
 
 import com.example.user.entity.User;
-import com.example.user.service.UserService;
+import com.example.user.service.UserServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -10,7 +10,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/user")
 public class UserController {
-    private final UserService rentService;
+    private final UserServiceImpl rentService;
 
     @PostMapping("/insert")
     public String insert(@RequestBody User user) {
