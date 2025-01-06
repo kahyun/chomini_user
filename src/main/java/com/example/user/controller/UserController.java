@@ -1,42 +1,73 @@
 package com.example.user.controller;
 
+import com.example.user.dto.UserRequestDTO;
+import com.example.user.dto.UserResponseDTO;
 import com.example.user.entity.User;
+import com.example.user.service.UserService;
 import com.example.user.service.UserServiceImpl;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.env.Environment;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Date;
 import java.util.List;
-@RestController
-@RequiredArgsConstructor
-@RequestMapping("/user")
-public class UserController {
-    private final UserServiceImpl rentService;
+import java.util.Optional;
 
-    @PostMapping("/insert")
-    public String insert(@RequestBody User user) {
-        rentService.insert(user);
-        return "Rent Insert +++++++++++++++";
+@RestController
+@RequestMapping("/user")
+@RequiredArgsConstructor
+public class UserController {
+    private final UserService userService;
+    private final Environment environment;
+    //매개변수 채워서 회원이 등록되도록 처리(포스트맨으로 테스트)
+    //Controller -> Service -> DAO -> Repository
+    @PostMapping("/create")
+    public ResponseEntity<?> createUser(@RequestBody UserRequestDTO requestDTO) {
+        System.out.println(requestDTO+"===================================");
+        userService.write(requestDTO);
+        return ResponseEntity.ok(HttpStatus.OK);
+    }
+    @PostMapping("/login")
+    public UserResponseDTO login(@RequestParam("username") String username,
+                                 @RequestParam("password") String password, HttpServletResponse response) {
+        UserResponseDTO responseDTO = userService.login(username, password);
+        if(responseDTO != null) {//인증이 성공
+            String mytoken = Jwts.builder()
+                    //사용자정의클레이임
+                    .setSubject(responseDTO.getUsername())
+                    .setExpiration(new Date(System.currentTimeMillis() +
+                            Long.parseLong(environment.getProperty("jwt.token-valid-in-millisecond"))))
+                    .signWith(SignatureAlgorithm.HS512,environment.getProperty("jwt.secret"))
+                    .compact();//위의 정보를 이용
+            //response의 헤더에 셋팅
+            response.setHeader("Authorization", mytoken);
+            response.setHeader("userName", responseDTO.getUsername());
+        }
+        return responseDTO;
+    }
+    @GetMapping("/mypage")
+    public String mypage(){
+        return "mypage";
     }
 
     @GetMapping("/{id}")
-    public User findById(@PathVariable Long id) {
-        return rentService.findById(id);
+    public Optional<User> findById(@PathVariable Long id) {
+        return userService.findById(id);
     }
 
     @DeleteMapping("/{id}")
     public String delete(@PathVariable Long id) {
-        rentService.delete(id);
+        userService.delete(id);
         return "Rent deleted successfully! delete -------";
-    }
-
-    @PostMapping("/update")
-    public String update(@RequestBody User user) {
-        rentService.update(user);
-        return "Rent updated successfully!update update upupupupup";
     }
 
     @GetMapping("/all")
     public List<User> findAll() {
-        return rentService.findAll();
+        return userService.findAll();
     }
 }
