@@ -29,7 +29,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponseDTO login(String username, String password) {
-        return null;
+       User entity = userDAO.login(username, password);
+       UserResponseDTO userResponseDTO = modelMapper.map(entity, UserResponseDTO.class);
+        return userResponseDTO;
     }
 
     @Override

@@ -14,8 +14,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -46,10 +49,27 @@ public class UserController {
                     .compact();//위의 정보를 이용
             //response의 헤더에 셋팅
             response.setHeader("Authorization", mytoken);
-            response.setHeader("userName", responseDTO.getUsername());
+            response.setHeader("userName", URLEncoder.encode(responseDTO.getUsername(), StandardCharsets.UTF_8));
         }
         return responseDTO;
     }
+    @GetMapping("/info")
+    public ResponseEntity<?> getUserInfo(@RequestHeader("Authorization") String token) {
+        try {
+            // JWT 토큰 파싱
+            String username = Jwts.parser()
+                    .setSigningKey(environment.getProperty("jwt.secret"))
+                    .parseClaimsJws(token)
+                    .getBody()
+                    .getSubject();
+
+            // 사용자 정보를 반환
+            return ResponseEntity.ok(Map.of("username", username));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("토큰이 유효하지 않습니다.");
+        }
+    }
+
     @GetMapping("/mypage")
     public String mypage(){
         return "mypage";
