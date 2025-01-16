@@ -35,8 +35,7 @@ public class JWTTest {
        Jws<Claims> tokeninfo = Jwts.parser().setSigningKey("myvalue").parseClaimsJws(mytoken);
         System.out.println(tokeninfo);
         System.out.println(tokeninfo.getBody());
-        System.out.println(tokeninfo.getBody().get("name"));
-        System.out.println(tokeninfo.getBody().get("id"));
+        System.out.println(tokeninfo.getBody().get("username"));
         System.out.println(tokeninfo.getBody().getExpiration());
         System.out.println(tokeninfo.getSignature());
 
